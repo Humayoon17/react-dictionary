@@ -1,23 +1,45 @@
-import logo from './logo.svg';
+import { useState } from 'react';
 import './App.css';
+import SearchWord from './components/SearchWord';
+import WordDetails from './components/WordDetails.js';
+
+const API_BASE_URL = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
 
 function App() {
+  const [word, setWord] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [fetchBefore, setFetchBefore] = useState(false);
+
+  const searchWord = async (query) => {
+    try {
+      setLoading(true);
+      setFetchBefore(true);
+
+      const response = await fetch(`${API_BASE_URL}${query}`);
+      if (response.status === 200) {
+        const result = await response.json();
+        setWord(result[0]);
+      } else {
+        setWord({});
+      }
+    } catch (_) {}
+    setLoading(false);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <SearchWord searchWord={searchWord} />
+      <div className='word_details'>
+        {fetchBefore ? (
+          loading ? (
+            'Please wait...'
+          ) : (
+            <WordDetails word={word} />
+          )
+        ) : (
+          'Please search a word'
+        )}
+      </div>
     </div>
   );
 }
